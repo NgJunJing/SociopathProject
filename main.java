@@ -35,9 +35,104 @@ public class main {
     
     public static void main(String[] args) throws ClassNotFoundException {
         Class.forName(DBDRV);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Welcome to New_2 - The Sociopath");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        Scanner sc = new Scanner(System.in);
+        do {
+            System.out.print("Enter your student ID [Integer][Enter '0' to exit the program]: "); // to abtain id input
+            System.out.println();
+            int id = -1;
+            try {
+                String in = sc.next();
+                id = Integer.parseInt(in);
+                sc.nextLine();
+            } catch (NumberFormatException e) { //check is the input an integer
+                System.out.println("Invalid input");
+                continue;
+            }  
+            // check if input is 0
+            if (id == 0) break;
+            
+            // check if the id exists
+            try {
+                con = DriverManager.getConnection(DBURL, DBUSER, DBPASSWD);
+                st = con.createStatement();
+                String checkID = "SELECT * FROM db_owner.Persons P WHERE P.ID =" +id+';';
+                rs = st.executeQuery(checkID);
+                if (rs.next()) {
+                    System.out.println("Hello, student, ID=" +id+'.');
+                } else {
+                    System.out.println("ID not found");
+                    continue;
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                break;
+            }
+            
+            // main menu section
+            do {
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.println("Main Menu\n" +
+                        "1. Teaching a Stranger to Solve Lab Questions\n" +
+                        "2. Chit-Chat\n" +
+                        "3. Your Road to Glory\n" +
+                        "4. Bored?\n" +
+                        "5. Meet Your Crush\n" +
+                        "6. Friendship\n" +
+                        "7. Exit Program");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.print("Select [Integer]: ");
+                System.out.println();
+                
+                int choice = -1;    
+                try {
+                    String in = sc.next();
+                    choice = Integer.parseInt(in);
+                    sc.nextLine();
+                } catch (NumberFormatException e) { //check is the input an integer
+                    System.out.println("Invalid input");
+                    continue;
+                }  
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                if (choice == 7) break;
+                boolean error = false;
+                switch(choice){
+                    case 1:
+                        if(!eventOne(id)) error = true;
+                        break;
+                    case 2:
+                        System.out.println("Not available yet");
+                        break;
+                    case 3:
+                        if(!eventThree(id)) error = true;
+                        break;
+                    case 4:
+                        System.out.println("Not available yet");
+                        break;
+                    case 5:
+                        System.out.println("Not available yet");
+                        break;
+                    case 6:
+                        System.out.println("Not available yet");
+                        break;
+                    default:
+                        System.out.println("Invalid choice");
+                        continue;
+                }
+                if (error == true) break;
+                else {
+                    System.out.println("Back to main menu? [Enter to continue]");
+                    sc.nextLine();
+                }
+            } while(true);
+            break;
+        } while (true);
+        System.out.println("You have exited the program.");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
         
-        eventOne(5);
-        eventThree(5);
     }
     
     public static boolean eventOne(int yourID) {
@@ -45,7 +140,7 @@ public class main {
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         Random r = new Random();
         int strangerID = 0; 
-        ArrayList<Integer> arrList = new ArrayList<>();
+        ArrayList<Integer> arrList = new ArrayList<>(); // to check the number of ID generated
         do {
             strangerID = r.nextInt(getSize()) + 1;
             if (arrList.isEmpty()) {
@@ -53,7 +148,7 @@ public class main {
             } else if (!arrList.contains(strangerID)) {
                 arrList.add(strangerID);
             }
-            if (arrList.size() == getSize()) {
+            if (arrList.size() == getSize()) { // if number of ID generated is same as the number of person as nodes
                 System.out.println("Looks like you have no more stranger that might know you");
                 System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 System.out.println("Event 1 ended.");
@@ -74,6 +169,7 @@ public class main {
         } else { // there is an edge, meaning you two might already know each other but not friends yet
             System.out.println("You might know this person but you are not friend with this person yet");
         }
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         
         boolean good = r.nextBoolean(); // the teaching experience
         try {
@@ -117,6 +213,7 @@ public class main {
             System.out.println("Anyway, student, ID=" +strangerID+" and you have became friends.");
             
             // display friend status
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             String friendStatus = "SELECT Person1.ID AS yourID, Person2.ID AS strangerID, Re1.friend AS f1, Re2.friend AS f2,"
                     + "Re1.reputation AS rep1, Re2.reputation AS rep2\n" +
             "FROM db_owner.Persons AS Person1, \n" +
@@ -146,6 +243,7 @@ public class main {
             return false;
         }
         System.out.println("Event 1 ended.");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
         return true;
     }
@@ -181,6 +279,7 @@ public class main {
             System.out.println("Select the people you are interested to have lunch with, by entering their respective ID");
             System.out.println("[ONE ID PER INPUT][Enter '0' to quit selection]"); // test 2 inputs at once
             int input;
+            ArrayList<Integer> checkID = new ArrayList<>();
             do {
                 System.out.print("Input: ");
                 System.out.println("");
@@ -200,6 +299,11 @@ public class main {
                 // check if input equals to the given ID
                 if (input == yourID) {
                     System.out.println("This is you.");
+                    continue;
+                }
+                // check if input ID has been selected
+                if (checkID.contains(input)) {
+                    System.out.println("This ID has been selected");
                     continue;
                 }
                 // check the input ID
@@ -222,10 +326,13 @@ public class main {
                         mins = (mins%60);
                     }
                     int endTime = hour*100 + mins;
-
+                    
                     //store
-                    startTimeEndTimeCollection.add(new Integer[] {id, startTime, endTime});
+                    Integer[] data = {id, startTime, endTime};
+                    checkID.add(id);
+                    startTimeEndTimeCollection.add(data);
                     System.out.println("ID recorded");
+                    
                 } else { // if ID not available
                     System.out.println("ID not found");
                 }
@@ -238,6 +345,7 @@ public class main {
         if (startTimeEndTimeCollection.isEmpty()) {
             System.out.println("You have not selected anyone.");
             System.out.println("Event 3 ended.");
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
             return true;
         }
@@ -300,6 +408,8 @@ public class main {
             sc.nextLine();
             if (in.equals("no")) {
                 System.out.println("Event 3 ended.");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
                 return true;
             }
             else if (in.equals("yes")) {
@@ -359,8 +469,9 @@ public class main {
                 return false;
             }
         }
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("Event 3 ended.");
-        System.out.println("");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
         return true;
     }
@@ -496,7 +607,6 @@ public class main {
             
             if (rs.next()) { return true;
             } else {
-                System.out.println("No such path existed");
                 return false;
             }
             
@@ -504,7 +614,7 @@ public class main {
             ex.printStackTrace();
             return false;
         }
-    }
+    } 
     
     public static int getSize() {
         try{
